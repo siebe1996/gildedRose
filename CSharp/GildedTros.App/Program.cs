@@ -1,43 +1,83 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using GildedTros.App.Client;
+using GildedTros.App.Client.Models;
+using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Kiota.Abstractions.Authentication;
+using Microsoft.Kiota.Http.HttpClientLibrary;
 
-namespace GildedTros.App
+Console.WriteLine("OMGHAI!");
+
+var baseUrl = Environment.GetEnvironmentVariable("services__api__https__0")
+              ?? throw new InvalidOperationException("API address was not injected by the AppHost.");
+
+var adapter = new HttpClientRequestAdapter(new AnonymousAuthenticationProvider())
 {
-    class Program
+    BaseUrl = baseUrl
+};
+var client = new ApiClient(adapter);
+
+var day = 0;
+
+await client.Api.Items.Add.PostAsync(CreateRequest());
+Console.WriteLine("Items sent to the API.");
+
+await using var hub = new HubConnectionBuilder()
+    .WithUrl(baseUrl + "/hubs/items")
+    .WithAutomaticReconnect()
+    .Build();
+
+hub.On("ItemsUpdated", async () =>
+{
+    await PrintItemsAsync();
+});
+
+await hub.StartAsync();
+Console.WriteLine("Connected to the hub. Waiting for updates. Press Ctrl+C to stop.");
+
+await PrintItemsAsync();
+
+await Task.Delay(Timeout.Infinite);
+return;
+
+static AddItemsRequest CreateRequest()
+{
+    var items = new List<AddItemsRequestItem>
     {
-        public static void Main(string[] args)
+        new() { Name = "Ring of Cleansening Code", SellIn = 10, Quality = 20 },
+        new() { Name = "Good Wine", SellIn = 2, Quality = 0 },
+        new() { Name = "Elixir of the SOLID", SellIn = 5, Quality = 7 },
+        new() { Name = "B-DAWG Keychain", SellIn = 0, Quality = 80 },
+        new() { Name = "B-DAWG Keychain", SellIn = -1, Quality = 80 },
+        new() { Name = "Backstage passes for Re:factor", SellIn = 15, Quality = 20 },
+        new() { Name = "Backstage passes for Re:factor", SellIn = 10, Quality = 49 },
+        new() { Name = "Backstage passes for HAXX", SellIn = 5, Quality = 49 },
+        // these smelly items do not work properly yet
+        new() { Name = "Duplicate Code", SellIn = 3, Quality = 6 },
+        new() { Name = "Long Methods", SellIn = 3, Quality = 6 },
+        new() { Name = "Ugly Variable Names", SellIn = 3, Quality = 6 }
+    };
+
+    return new AddItemsRequest { Items = items };
+}
+
+async Task PrintItemsAsync()
+{
+    try
+    {
+        var items = await client.Api.Items.GetAsync() ?? [];
+
+        Console.WriteLine("-------- day " + day + " --------");
+        Console.WriteLine("name, sellIn, quality");
+
+        foreach (var item in items)
         {
-            Console.WriteLine("OMGHAI!");
-
-            IList<Item> Items = new List<Item>{
-                new Item {Name = "Ring of Cleansening Code", SellIn = 10, Quality = 20},
-                new Item {Name = "Good Wine", SellIn = 2, Quality = 0},
-                new Item {Name = "Elixir of the SOLID", SellIn = 5, Quality = 7},
-                new Item {Name = "B-DAWG Keychain", SellIn = 0, Quality = 80},
-                new Item {Name = "B-DAWG Keychain", SellIn = -1, Quality = 80},
-                new Item {Name = "Backstage passes for Re:factor", SellIn = 15, Quality = 20},
-                new Item {Name = "Backstage passes for Re:factor", SellIn = 10, Quality = 49},
-                new Item {Name = "Backstage passes for HAXX", SellIn = 5, Quality = 49},
-                // these smelly items do not work properly yet
-                new Item {Name = "Duplicate Code", SellIn = 3, Quality = 6},
-                new Item {Name = "Long Methods", SellIn = 3, Quality = 6},
-                new Item {Name = "Ugly Variable Names", SellIn = 3, Quality = 6}
-            };
-
-            var app = new GildedTros(Items);
-
-
-            for (var i = 0; i < 31; i++)
-            {
-                Console.WriteLine("-------- day " + i + " --------");
-                Console.WriteLine("name, sellIn, quality");
-                for (var j = 0; j < Items.Count; j++)
-                {
-                    System.Console.WriteLine(Items[j].Name + ", " + Items[j].SellIn + ", " + Items[j].Quality);
-                }
-                Console.WriteLine("");
-                app.UpdateQuality();
-            }
+            Console.WriteLine(item.Name + ", " + item.SellIn + ", " + item.Quality);
         }
+
+        Console.WriteLine();
+        day++;
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Could not load items: " + ex.Message);
     }
 }
