@@ -56,21 +56,19 @@ Kiota stores its settings in `kiota-lock.json`. Commit this file so that regener
 
 ## Configuring the update job schedule (WindowsService)
 
-The update job schedule is defined in `WindowsService\appsettings.json`. Edit the section below (placeholder key names; check the actual file):
+The update job interval is defined in `WindowsService\appsettings.json`:
 
-```
+```json
 {
-  "UpdateJob": {
-    "Enabled": true,
-    "CronExpression": "0 0 * * *"
+  "Job": {
+    "Interval": "00:00:15"
   }
 }
 ```
 
-- `Enabled`: turns the update job on or off.
-- `CronExpression`: a standard five-part cron expression that defines when the job runs. The example `0 0 * * *` runs the job every day at midnight.
+- `Interval`: how often the job runs, as a .NET `TimeSpan` string (`hh:mm:ss`). The example `00:00:15` runs the job every 15 seconds. Use `00:01:00` for every minute or `1.00:00:00` for every day.
 
-Restart the Windows service after changing the file so the new schedule is applied.
+Restart the Windows service after changing the file so the new interval is applied.
 
 ## Running the tests
 
@@ -79,7 +77,3 @@ Run the tests from __Test Explorer__ in Visual Studio, or from the terminal:
 ```
 dotnet test GildedRose.sln
 ```
-
-## Original kata
-
-The kata instructions can be found in the GildedRoseRequirements document. The project was rebranded by Axxes IT Consultancy as Gilded Tros.
