@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "microsoft.openapi.kiota": {
+      "version": "1.37",
+      "commands": [
+        "kiota"
+      ],
+      "rollForward": false
+    },
+    "aspire.cli": {
+      "version": "13.5.4",
+      "commands": [
+        "aspire"
+      ],
+      "rollForward": false
+    }
+  }
+}

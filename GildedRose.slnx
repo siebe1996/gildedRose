@@ -1,0 +1,27 @@
+<Solution>
+  <Folder Name="/Client/">
+    <Project Path="GildedRose.App/GildedRose.App.csproj" />
+  </Folder>
+  <Folder Name="/Server/" />
+  <Folder Name="/Server/Core/">
+    <Project Path="Application/Application.csproj" />
+    <Project Path="Domain/Domain.csproj" />
+    <Project Path="Models/Models.csproj" />
+  </Folder>
+  <Folder Name="/Server/Core/Tests/">
+    <Project Path="Application.UnitTests/Application.UnitTests.csproj" />
+    <Project Path="Domain.UnitTests/Domain.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/Server/DataProviders/">
+    <Project Path="Dal/Dal.csproj" />
+  </Folder>
+  <Folder Name="/Server/DataProviders/Tests/" />
+  <Folder Name="/Server/EntryPoints/">
+    <Project Path="Api/Api.csproj" />
+    <Project Path="WindowsService/WindowsService.csproj" />
+  </Folder>
+  <Folder Name="/Server/EntryPoints/Tests/">
+    <Project Path="Api.UnitTests/Api.UnitTests.csproj" />
+  </Folder>
+  <Project Path="GildedRose/GildedRose.csproj" />
+</Solution>
