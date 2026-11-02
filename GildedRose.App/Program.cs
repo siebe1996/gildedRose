@@ -1,83 +1,46 @@
-﻿using GildedRose.App.ApiClient;
-using GildedRose.App.ApiClient.Models;
-using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Kiota.Abstractions.Authentication;
-using Microsoft.Kiota.Http.HttpClientLibrary;
+using GildedRose.App;
+using GildedRose.App.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using SignalR.Client.DependencyInjection;
 
 Console.WriteLine("OMGHAI!");
 
-var baseUrl = Environment.GetEnvironmentVariable("services__api__https__0")
+// Add a host for DI
+var builder = Host.CreateApplicationBuilder(args);
+
+var baseUrl = builder.Configuration["services:api:https:0"]
               ?? throw new InvalidOperationException("API address was not injected by the AppHost.");
 
-var adapter = new HttpClientRequestAdapter(new AnonymousAuthenticationProvider())
+builder.Services.AddGildedRoseApi(baseUrl);
+builder.Services.AddSignalRClients(baseUrl);
+builder.Services.AddSingleton(Console.Out);
+builder.Services.AddSingleton<IItemsService, ItemsService>();
+builder.Services.AddSingleton<ItemSeeder>();
+builder.Services.AddSingleton<ItemsPrinter>();
+
+using var host = builder.Build();
+
+var seeder = host.Services.GetRequiredService<ItemSeeder>();
+var itemsService = host.Services.GetRequiredService<IItemsService>();
+var printer = host.Services.GetRequiredService<ItemsPrinter>();
+
+// Seed the items to the API.
+await seeder.SeedAsync();
+
+var shutdown = new TaskCompletionSource();
+Console.CancelKeyPress += (_, e) =>
 {
-    BaseUrl = baseUrl
+    e.Cancel = true;
+    shutdown.TrySetResult();
 };
-var client = new GildedRoseApiClient(adapter);
 
-var day = 0;
-
-await client.Api.Items.Add.PostAsync(CreateRequest());
-Console.WriteLine("Items sent to the API.");
-
-await using var hub = new HubConnectionBuilder()
-    .WithUrl(baseUrl + "/hubs/items")
-    .WithAutomaticReconnect()
-    .Build();
-
-hub.On("ItemsUpdated", async () =>
-{
-    await PrintItemsAsync();
-});
-
-await hub.StartAsync();
+// Subscribe to the changed event of items service and print the items when they change. This will also print the items once at startup
+printer.Subscribe();
+// Connect to the SignalR hub to receive updates when items change
+await itemsService.ConnectAsync();
 Console.WriteLine("Connected to the hub. Waiting for updates. Press Ctrl+C to stop.");
 
-await PrintItemsAsync();
+await printer.PrintAsync();
 
-await Task.Delay(Timeout.Infinite);
-return;
-
-static AddItemsRequest CreateRequest()
-{
-    var items = new List<AddItemsRequestItem>
-    {
-        new() { Name = "Ring of Cleansening Code", SellIn = 10, Quality = 20 },
-        new() { Name = "Good Wine", SellIn = 2, Quality = 0 },
-        new() { Name = "Elixir of the SOLID", SellIn = 5, Quality = 7 },
-        new() { Name = "B-DAWG Keychain", SellIn = 0, Quality = 80 },
-        new() { Name = "B-DAWG Keychain", SellIn = -1, Quality = 80 },
-        new() { Name = "Backstage passes for Re:factor", SellIn = 15, Quality = 20 },
-        new() { Name = "Backstage passes for Re:factor", SellIn = 10, Quality = 49 },
-        new() { Name = "Backstage passes for HAXX", SellIn = 5, Quality = 49 },
-        // these smelly items do not work properly yet
-        new() { Name = "Duplicate Code", SellIn = 3, Quality = 6 },
-        new() { Name = "Long Methods", SellIn = 3, Quality = 6 },
-        new() { Name = "Ugly Variable Names", SellIn = 3, Quality = 6 }
-    };
-
-    return new AddItemsRequest { Items = items };
-}
-
-async Task PrintItemsAsync()
-{
-    try
-    {
-        var items = await client.Api.Items.GetAsync() ?? [];
-
-        Console.WriteLine("-------- day " + day + " --------");
-        Console.WriteLine("name, sellIn, quality");
-
-        foreach (var item in items)
-        {
-            Console.WriteLine(item.Name + ", " + item.SellIn + ", " + item.Quality);
-        }
-
-        Console.WriteLine();
-        day++;
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("Could not load items: " + ex.Message);
-    }
-}
+await shutdown.Task;
