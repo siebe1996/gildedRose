@@ -1,10 +1,10 @@
-﻿using GildedTros.WindowsService.Client;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using WindowsService.ApiClient;
 using WindowsService.Settings;
 
 namespace WindowsService.Workers.Items;
 
-public sealed class UpdateQualityWorker(ApiClient client, IOptions<JobOptions> options, ILogger<UpdateQualityWorker> logger) : BackgroundService
+public sealed class UpdateQualityWorker(GildedRoseApiClient client, IOptions<JobOptions> options, ILogger<UpdateQualityWorker> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

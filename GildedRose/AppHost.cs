@@ -2,7 +2,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var api = builder.AddProject<Projects.Api>("api");
 
-builder.AddProject<Projects.GildedTros_App>("app")
+builder.AddProject<Projects.GildedRose_App>("app")
     .WithReference(api)
     .WaitFor(api);
 
