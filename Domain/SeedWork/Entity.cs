@@ -27,16 +27,15 @@ public abstract class Entity<TId>(TId id)
     public override bool Equals(object? obj)
     {
         if (obj is not Entity<TId> entity)
-        {
             return false;
-        }
-        if (this == entity)
+        if (ReferenceEquals(this, entity))
             return true;
-
-        return !(GetType() != entity.GetType()) 
-               && !entity.IsTransient() 
-               && !IsTransient() 
-               && EqualityComparer<TId>.Default.Equals(entity.Id, Id);
+        if (GetType() != entity.GetType())
+            return false;
+        if (entity.IsTransient() || IsTransient())
+            return false;
+        else
+            return EqualityComparer<TId>.Default.Equals(entity.Id, Id);
     }
 
     public override int GetHashCode()

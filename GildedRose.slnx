@@ -10,6 +10,7 @@
   </Folder>
   <Folder Name="/Server/Core/Tests/">
     <Project Path="Application.UnitTests/Application.UnitTests.csproj" />
+    <Project Path="Dal.UnitTests/Dal.UnitTests.csproj" Id="165deec8-5040-459f-bd8f-623b4195dcba" />
     <Project Path="Domain.UnitTests/Domain.UnitTests.csproj" />
   </Folder>
   <Folder Name="/Server/DataProviders/">
