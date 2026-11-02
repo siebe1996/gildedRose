@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Client/">
     <Project Path="GildedRose.App/GildedRose.App.csproj" />
+    <Project Path="SignalR.Client/SignalR.Client.csproj" />
   </Folder>
   <Folder Name="/Server/" />
   <Folder Name="/Server/Core/">
