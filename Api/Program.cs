@@ -6,7 +6,6 @@ using Application.Items.Commands;
 using Application.Items.Queries;
 using Dal.DependencyInjection;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.SignalR;
 using Models.Items;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplicationHandlers();
 builder.Services.AddDal();
 builder.Services.AddSignalR();
+builder.Services.AddSingleton<IItemsNotifier, ItemsNotifier>();
+
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -29,19 +30,21 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapPost("/api/items/add", async Task<Created> (AddItemsRequest request, ICommandHandler<AddItemsCommand> handler, CancellationToken cancellationToken) =>
+app.MapPost("/api/items/add", async Task<Created> (AddItemsRequest request, ICommandHandler<AddItemsCommand> handler, IItemsNotifier notifier, CancellationToken cancellationToken) =>
     {
         var itemsToBeCreated = request.Items!.Select(i => new ItemRequestModel(i.Name!, i.SellIn!.Value, i.Quality!.Value)).ToList();
         await handler.Handle(new AddItemsCommand(itemsToBeCreated), cancellationToken);
+        await notifier.NotifyItemsUpdatedAsync(cancellationToken);
 
         return TypedResults.Created();
 
     }).WithName("AddItems");
 
-app.MapPost("/api/items/update-quality", async (ICommandHandler<UpdateQualityCommand> handler, IHubContext<ItemsSignalRHub> hubContext, CancellationToken cancellationToken) =>
+app.MapPost("/api/items/update-quality", async (ICommandHandler<UpdateQualityCommand> handler, IItemsNotifier notifier, CancellationToken cancellationToken) =>
 {
     await handler.Handle(new UpdateQualityCommand(), cancellationToken);
-    await hubContext.Clients.All.SendAsync("ItemsUpdated", cancellationToken);
+    await notifier.NotifyItemsUpdatedAsync(cancellationToken);
+
     return TypedResults.NoContent();
 }).WithName("UpdateQuality");
 

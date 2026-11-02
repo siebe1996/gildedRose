@@ -2,7 +2,4 @@
 
 namespace Api.Items.Hubs;
 
-public class ItemsSignalRHub : Hub
-{
-    
-}
+public class ItemsSignalRHub : Hub<IItemsClient>;
