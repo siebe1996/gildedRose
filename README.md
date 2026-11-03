@@ -26,7 +26,7 @@ dotnet tool restore
 ## Running the solution
 
 1. Open `GildedRose.sln` in Visual Studio.
-2. Set the Aspire AppHost project (`GildedRose.AppHost`, placeholder) as the startup project.
+2. Set the Aspire AppHost project (`GildedRose.AppHost`) as the startup project.
 3. Press __F5__ to start the API, the Windows service, and the console app together.
 
 ## OpenAPI specification
