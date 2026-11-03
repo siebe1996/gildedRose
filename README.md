@@ -10,7 +10,7 @@ The solution contains the following parts:
 - **Kiota-generated clients**: the Windows service and the console app use a typed HTTP client generated with [Kiota](https://learn.microsoft.com/openapi/kiota/) from the API's OpenAPI description.
 - **WindowsService**: a Windows service (`BackgroundService`) that runs an update job on a schedule. The schedule is set in `appsettings.json`.
 - **GildedRose.App**: a console application that uses the generated Kiota client to interact with the API.
-- **Aspire AppHost** (`GildedRose.AppHost`, placeholder name): orchestrates the API, the Windows service, and the console app so they start and run together.
+- **Aspire AppHost** (`GildedRose.AppHost`): orchestrates the API, the Windows service, and the console app so they start and run together.
 
 ## Prerequisites
 
