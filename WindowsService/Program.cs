@@ -8,7 +8,10 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddWindowsService(options => options.ServiceName = "GildedTros Quality Job");
 
-builder.Services.Configure<JobOptions>(builder.Configuration.GetSection("Job"));
+builder.Services.AddOptions<JobOptions>()
+    .BindConfiguration(JobOptions.SectionName)
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
 builder.Services.AddSingleton<GildedRoseApiClient>(_ =>
 {

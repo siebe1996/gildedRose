@@ -25,6 +25,7 @@
   </Folder>
   <Folder Name="/Server/EntryPoints/Tests/">
     <Project Path="Api.UnitTests/Api.UnitTests.csproj" />
+    <Project Path="WindowsService.UnitTests/WindowsService.UnitTests.csproj" Id="fb0f255e-063f-4a6c-9853-92387a7141c2" />
   </Folder>
   <Project Path="GildedRose/GildedRose.csproj" />
 </Solution>

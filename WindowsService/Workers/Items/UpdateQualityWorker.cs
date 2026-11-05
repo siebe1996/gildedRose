@@ -8,7 +8,7 @@ public sealed class UpdateQualityWorker(GildedRoseApiClient client, IOptions<Job
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var timer = new PeriodicTimer(options.Value.Interval);
+        using var timer = new PeriodicTimer(options.Value.Interval!.Value);
 
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
