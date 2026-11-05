@@ -7,7 +7,7 @@ public sealed class JobOptions : IValidatableObject
     public const string SectionName = "Job";
 
     [Required]
-    public TimeSpan? Interval { get; set; }
+    public TimeSpan? Interval { get; init; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
